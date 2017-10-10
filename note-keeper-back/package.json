@@ -1,0 +1,21 @@
+{
+  "name": "note-keeper-back",
+  "version": "1.0.0",
+  "description": "Mobile development Node.js demo - backend",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon ./index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^1.0.3",
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "express-session": "^1.15.6",
+    "mongoose": "^4.12.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.12.1"
+  }
+}
