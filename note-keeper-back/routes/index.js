@@ -1,22 +1,30 @@
 var express = require('express');
-var Note = require('../models');
+var User = require('../models');
 var router = express.Router();
 
+// base
 router.get('/', function (req, res, next) {
-    return res.send('Hello backend');
+    return res.send('Server is running...');
 });
-
-router.get('/notes', function(req, res, next) {
-    Note.find({}).exec(function(err, notes) {
-        if (err) return next(err);
-        else res.send(notes);
+// get user (and notes)
+router.get('/user', function(req, res, next) {
+    User.find({}).exec(function(error, user) {
+        if (error) {
+            return next(error);
+        } else {
+            res.send(user);
+        }
     });
 });
-
-router.post('/add', function (req, res, next) {
-    Note.create(req.body).then(function(note){
-        res.send(note);
-    }).catch(next);    
+// register new user
+router.post('/register', function(req, res, next) {
+    User.create(req.body).then(function(error, user) {
+        if (error) {
+            return next(error);
+        } else {
+            res.send(user);
+        }
+    })
 });
 
 module.exports = router;

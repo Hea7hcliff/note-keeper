@@ -25,6 +25,20 @@ var NoteSchema = new mongoose.Schema({
     }
 });
 
-var Note = mongoose.model('Note', NoteSchema);
+var UserSchema = new mongoose.Schema({
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true
+    },
+    password: {
+        type: String,
+        required: true
+    },
+    notes: [NoteSchema]
+});
 
-module.exports = Note;
+var User = mongoose.model('User', UserSchema);
+
+module.exports = User;
