@@ -1,0 +1,21 @@
+body {
+    font-family: "Lucida Console", Monaco, monospace;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000;
+}
+.container {
+    text-align: center;
+    color: #33ff66;
+}
+span {
+    animation: Terminal 1s infinite;
+}
+@keyframes Terminal {
+    0% {opacity: 1}
+    40% {opacity: 1}
+    50% {opacity: 0}
+    90% {opacity: 0}
+}
