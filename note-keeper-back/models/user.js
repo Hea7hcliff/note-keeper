@@ -1,40 +1,6 @@
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt');
 
-var NoteSchema = new mongoose.Schema({
-    title: {
-        type: String,
-        required: false,
-        unique: false
-    },
-    description: {
-        type: String,
-        required: true,
-        unique: false
-    },
-    priority: {
-        type: Number,
-        required: true,
-        unique: false,
-        default: 0
-    },
-    done: {
-        type: Boolean,
-        required: true,
-        unique: false,
-        default: false
-    }
-});
-
-var UserDataSchema = new mongoose.Schema({
-    uid: {
-        type: String,
-        unique: true,
-        required: true
-    },
-    notes: [NoteSchema]
-});
-
 var UserSchema = new mongoose.Schema({
     email: {
         type: String,
@@ -83,8 +49,6 @@ UserSchema.pre('save', function(next) {
     });
 });
 
-var UserData = mongoose.model('UserData', UserDataSchema);
 var User = mongoose.model('User', UserSchema);
 
-module.exports = UserData;
 module.exports = User;

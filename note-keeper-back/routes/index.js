@@ -1,5 +1,6 @@
 var express = require('express');
-var User = require('../models');
+var User = require('../models/user');
+var Note = require('../models/note');
 var router = express.Router();
 
 // base
@@ -52,6 +53,19 @@ router.post('/login', function(req, res, next) {
     }
 });
 
+// logout
+router.post('/logout', function(req, res, next) {
+    if (req.session) {
+        req.session.destroy(function(error) {
+            if (error) {
+                return next(error);
+            } else {
+                return res.send({ logout: true });
+            }
+        });
+    }
+});
+
 // register new user
 router.post('/register', function(req, res, next) {
     var email = req.body.email;
@@ -85,6 +99,52 @@ router.post('/register', function(req, res, next) {
 });
 
 // NOTES ->
+
+// add new
+router.post('/addnew', function(req, res, next) {
+
+    var currentUser = req.session.userId;
+    // defining note object to insert
+    var note = {
+        title: req.body.title,
+        description: req.body.description,
+        priority: req.body.priority
+    };
+    /*
+        create user instance to insert into notes collection 
+        if no user _id yet exist (first insert)
+    */
+    var data = {
+        _id: currentUser,
+        notes: [note]
+    }
+
+    if (!currentUser) {
+        var error = new Error('Unauthorized!');
+        error.status = 401;
+        return next(error);
+    }
+
+    // push new note object
+    Note.findByIdAndUpdate(currentUser,
+        {$push: { notes: note }},
+        { new: true, upsert: true },
+        function(error, note) {
+            if (error) {
+                return next(error);
+            } else if (!currentUser) {
+                // create new user object if does not exist
+                Note.create(data, function(error, data) {
+                    if (error) {
+                        return next(error);
+                    }
+                    return res.send(data);
+                });
+            }
+            return res.send(note);
+        }
+    );
+});
 
 module.exports = router;
  
