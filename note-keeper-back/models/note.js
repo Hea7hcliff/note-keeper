@@ -26,6 +26,10 @@ var NoteSchema = new mongoose.Schema({
             unique: false,
             default: false
         },
+        modifiedDate: {
+            type: Date,
+            default: Date.now
+        } 
     }]
 });
 

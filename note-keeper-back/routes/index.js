@@ -21,11 +21,11 @@ router.get('/users', function (req, res, next) {
             h2: 'authorities were notified'
         });
     } else {
-        User.find({}).exec(function (error, user) {
+        User.find({}).exec(function (error, users) {
             if (error) {
                 return next(error);
             } else {
-                res.send(user);
+                res.send(users);
             }
         });
     }
@@ -44,6 +44,8 @@ router.post('/login', function (req, res, next) {
                 return next(error);
             } else {
                 req.session.userId = user._id;
+                // temp
+                // todo access tokens
                 return res.send(req.session.userId);
             }
         });
@@ -88,7 +90,8 @@ router.post('/register', function (req, res, next) {
                 return next(error);
             } else {
                 req.session.userId = user._id;
-                // temporary
+                // temp
+                // todo access tokens
                 return res.send(req.session.userId);
             }
         });
@@ -101,23 +104,9 @@ router.post('/register', function (req, res, next) {
 
 // NOTES ->
 
-// add new
+// ADD NEW
 router.post('/add', function (req, res, next) {
     var currentUser = req.session.userId;
-    // defining note object to insert
-    var note = {
-        title: req.body.title,
-        description: req.body.description,
-        priority: req.body.priority
-    };
-    /*
-        create user instance to insert into notes collection 
-        if no user _id yet exist (first insert)
-    */
-    var data = {
-        _id: currentUser,
-        notes: [note]
-    }
 
     if (!currentUser) {
         var error = new Error('Unauthorized!');
@@ -125,28 +114,52 @@ router.post('/add', function (req, res, next) {
         return next(error);
     }
 
+    // prevent empty notes
+    if (!req.body.title && !req.body.description) {
+        var error = new Error('Title or description must be filled!');
+        return next(error);
+    }
+
+    // defining note object to insert
+    var note = {
+        title: req.body.title,
+        description: req.body.description,
+        priority: req.body.priority
+    };
+
+    /*
+    create user instance to insert into notes collection 
+    if no user _id yet exist (first insert)
+     */
+    var userData = {
+        _id: currentUser,
+        notes: [note]
+    }
+
     // push new note object
     Note.findByIdAndUpdate(currentUser,
         { $push: { notes: note } },
         { new: true, upsert: true },
-        function (error, notes) {
+        function (error, response) {
             if (error) {
                 return next(error);
             } else if (!currentUser) {
                 // create new user object if does not exist
-                Note.create(data, function (error, notes) {
+                Note.create(userData, function (error, response) {
                     if (error) {
                         return next(error);
                     }
-                    return res.send(notes);
+                    // temp
+                    return res.send(response);
                 });
             }
-            return res.send(notes);
+            // temp
+            return res.send(response);
         }
     );
 });
 
-// get note by id
+// GET NOTE BY ID
 router.get('/notes/:id', function (req, res, next) {
     var currentUser = req.session.userId;
 
@@ -159,17 +172,17 @@ router.get('/notes/:id', function (req, res, next) {
     Note.find(
         { _id: currentUser, "notes._id": req.params.id },
         { 'notes.$': 1 },
-        function (error, data) {
+        function (error, response) {
             if (error) {
                 return next(error);
             }
-            const response = data[0].notes;
-            return res.send(response);
+            const note = response[0].notes;
+            return res.send(note);
         }
     );
 });
 
-// update one
+// UPDATE NOTE
 router.put('/update/:id', function (req, res, next) {
     var currentUser = req.session.userId;
 
@@ -179,11 +192,18 @@ router.put('/update/:id', function (req, res, next) {
         return next(error);
     }
 
+    // prevent empty notes
+    if (!req.body.title && !req.body.description) {
+        var error = new Error('Title or description must be filled!');
+        return next(error);
+    }
+
     var updated = {
         'notes.$.title': req.body.title,
         'notes.$.description': req.body.description,
         'notes.$.priority': req.body.priority,
-        'notes.$.done': req.body.done
+        'notes.$.done': req.body.done,
+        'notes.$.modifiedDate': new Date().toISOString()
     }
 
     Note.update(
@@ -191,13 +211,61 @@ router.put('/update/:id', function (req, res, next) {
         {
             '$set': updated
         },
-        function (error, data) {
+        function (error) {
             if (error) {
                 return next(error);
             }
             return res.send({ updated: true });
         }
     );
+});
+
+// REMOVE NOTE
+router.delete('/delete/:id', function (req, res, next) {
+    var currentUser = req.session.userId;
+
+    if (!currentUser) {
+        var error = new Error('Unauthorized!');
+        error.status = 401;
+        return next(error);
+    }
+
+    Note.findByIdAndUpdate(currentUser, 
+        { $pull: { notes: { _id: req.params.id }}}, 
+        {new: true}, 
+        function (error, data) {
+            if (error) {
+                return next(error);
+            }
+            // temp
+            return res.send(data);
+        }
+    );
+});
+
+// GET ALL NOTES
+router.get('/notes', function(req, res, next) {
+    var currentUser = req.session.userId;
+
+    if (!currentUser) {
+        var error = new Error('Unauthorized!');
+        error.status = 401;
+        return next(error);
+    }
+
+    if (req.query['priority'] == 1) {
+        Note.findById(currentUser, function(error, response) {
+            var data = response.notes.sort();
+            return res.send(data);
+        });
+    } else {
+        Note.findById(currentUser, function(error, response) {
+            if (error) {
+                return next(error);
+            }
+            return res.send(response.notes);
+        });
+    }
 });
 
 module.exports = router;
