@@ -1,4 +1,5 @@
 var express = require('express');
+var mongoose = require('mongoose');
 var User = require('../models/user');
 var Note = require('../models/note');
 var router = express.Router();
@@ -102,7 +103,6 @@ router.post('/register', function(req, res, next) {
 
 // add new
 router.post('/addnew', function(req, res, next) {
-
     var currentUser = req.session.userId;
     // defining note object to insert
     var note = {
@@ -129,21 +129,58 @@ router.post('/addnew', function(req, res, next) {
     Note.findByIdAndUpdate(currentUser,
         {$push: { notes: note }},
         { new: true, upsert: true },
-        function(error, note) {
+        function(error, notes) {
             if (error) {
                 return next(error);
             } else if (!currentUser) {
                 // create new user object if does not exist
-                Note.create(data, function(error, data) {
+                Note.create(data, function(error, notes) {
                     if (error) {
                         return next(error);
                     }
-                    return res.send(data);
+                    return res.send(notes);
                 });
+            }
+            return res.send(notes);
+        }
+    );
+});
+
+// get note by id
+router.get('/notes/:id', function(req, res, next) {
+    var currentUser = req.session.userId;
+    
+    if (!currentUser) {
+        var error = new Error('Unauthorized!');
+        error.status = 401;
+        return next(error);
+    }
+
+    console.log(req.params.id);
+    // User.findOne({id: req.body.myId}).select({ Friends: {$elemMatch: {id: req.body.id}}}),
+
+    Note.find(
+        { _id: currentUser, "notes._id": req.params.id },
+        { 'notes.$': 1 },
+        function(error, note) {
+            if (error) {
+                return next(error);
             }
             return res.send(note);
         }
     );
+});
+
+// update one
+router.put('/updateone', function(req, res, next) {
+    var currentUser = req.session.userId;
+
+    if (!currentUser) {
+        var error = new Error('Unauthorized!');
+        error.status = 401;
+        return next(error);
+    }
+
 });
 
 module.exports = router;
