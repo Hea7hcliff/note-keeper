@@ -38,7 +38,7 @@ app.use(function (req, res, next) {
 
 // parse incoming data
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // serve static files from public (CSS)
 app.use(express.static(__dirname + '/public'));

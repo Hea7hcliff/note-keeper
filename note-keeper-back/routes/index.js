@@ -14,14 +14,14 @@ router.get('/', function (req, res, next) {
 
 // get users (for admin use only)
 // admin@admin.com / isAdmin
-router.get('/users', function(req, res, next) {
+router.get('/users', function (req, res, next) {
     if (req.session.userId !== '59e23cb93a71c90a12632213') {
         return res.render('index', {
             h1: 'Access Denied!',
             h2: 'authorities were notified'
         });
     } else {
-        User.find({}).exec(function(error, user) {
+        User.find({}).exec(function (error, user) {
             if (error) {
                 return next(error);
             } else {
@@ -32,12 +32,12 @@ router.get('/users', function(req, res, next) {
 });
 
 // login
-router.post('/login', function(req, res, next) {
+router.post('/login', function (req, res, next) {
     var email = req.body.email;
     var password = req.body.password;
 
     if (email && password) {
-        User.authenticate(email, password, function(error, user) {
+        User.authenticate(email, password, function (error, user) {
             if (error || !user) {
                 var error = new Error('Wrong email or password!');
                 error.status = 401;
@@ -55,9 +55,9 @@ router.post('/login', function(req, res, next) {
 });
 
 // logout
-router.post('/logout', function(req, res, next) {
+router.post('/logout', function (req, res, next) {
     if (req.session) {
-        req.session.destroy(function(error) {
+        req.session.destroy(function (error) {
             if (error) {
                 return next(error);
             } else {
@@ -68,7 +68,7 @@ router.post('/logout', function(req, res, next) {
 });
 
 // register new user
-router.post('/register', function(req, res, next) {
+router.post('/register', function (req, res, next) {
     var email = req.body.email;
     var password = req.body.password;
     var confirmPassword = req.body.confirmPassword;
@@ -83,7 +83,7 @@ router.post('/register', function(req, res, next) {
             email: email,
             password: password
         };
-        User.create(userData, function(error, user) {
+        User.create(userData, function (error, user) {
             if (error) {
                 return next(error);
             } else {
@@ -102,7 +102,7 @@ router.post('/register', function(req, res, next) {
 // NOTES ->
 
 // add new
-router.post('/addnew', function(req, res, next) {
+router.post('/add', function (req, res, next) {
     var currentUser = req.session.userId;
     // defining note object to insert
     var note = {
@@ -127,14 +127,14 @@ router.post('/addnew', function(req, res, next) {
 
     // push new note object
     Note.findByIdAndUpdate(currentUser,
-        {$push: { notes: note }},
+        { $push: { notes: note } },
         { new: true, upsert: true },
-        function(error, notes) {
+        function (error, notes) {
             if (error) {
                 return next(error);
             } else if (!currentUser) {
                 // create new user object if does not exist
-                Note.create(data, function(error, notes) {
+                Note.create(data, function (error, notes) {
                     if (error) {
                         return next(error);
                     }
@@ -147,32 +147,30 @@ router.post('/addnew', function(req, res, next) {
 });
 
 // get note by id
-router.get('/notes/:id', function(req, res, next) {
+router.get('/notes/:id', function (req, res, next) {
     var currentUser = req.session.userId;
-    
+
     if (!currentUser) {
         var error = new Error('Unauthorized!');
         error.status = 401;
         return next(error);
     }
 
-    console.log(req.params.id);
-    // User.findOne({id: req.body.myId}).select({ Friends: {$elemMatch: {id: req.body.id}}}),
-
     Note.find(
         { _id: currentUser, "notes._id": req.params.id },
         { 'notes.$': 1 },
-        function(error, note) {
+        function (error, data) {
             if (error) {
                 return next(error);
             }
-            return res.send(note);
+            const response = data[0].notes;
+            return res.send(response);
         }
     );
 });
 
 // update one
-router.put('/updateone', function(req, res, next) {
+router.put('/update/:id', function (req, res, next) {
     var currentUser = req.session.userId;
 
     if (!currentUser) {
@@ -181,7 +179,25 @@ router.put('/updateone', function(req, res, next) {
         return next(error);
     }
 
+    var updated = {
+        'notes.$.title': req.body.title,
+        'notes.$.description': req.body.description,
+        'notes.$.priority': req.body.priority,
+        'notes.$.done': req.body.done
+    }
+
+    Note.update(
+        { _id: currentUser, 'notes._id': req.params.id },
+        {
+            '$set': updated
+        },
+        function (error, data) {
+            if (error) {
+                return next(error);
+            }
+            return res.send({ updated: true });
+        }
+    );
 });
 
 module.exports = router;
- 

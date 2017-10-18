@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon ./index.js"
   },
-  "author": "",
+  "author": "Artur Veselovski, Mikko Tiitinen, Panu Partanen,",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^1.0.3",
