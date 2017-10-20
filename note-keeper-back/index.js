@@ -2,6 +2,8 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var session = require('express-session');
+var expressJWT = require('express-jwt');
+var jwt = require('jsonwebtoken');
 var MongoStore = require('connect-mongo')(session);
 var app = express();
 var routes = require('./routes/index');
@@ -64,6 +66,11 @@ app.use(function(error, req, res, next) {
             h1: 404,
             h2: 'bad luck'
         })
+    } else if (error.status === 401) {
+        res.render('index', {
+            h1: 'Access Denied!',
+            h2: 'authorities were notified'
+        });
     } else {
         res.status(error.status || 500).send(error.message);
     }

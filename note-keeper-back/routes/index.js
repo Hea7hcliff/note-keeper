@@ -1,7 +1,10 @@
 var express = require('express');
 var mongoose = require('mongoose');
+var expressJWT = require('express-jwt');
+var jwt = require('jsonwebtoken');
 var User = require('../models/user');
 var Note = require('../models/note');
+var middleware = require('../middleware');
 var router = express.Router();
 
 // base
@@ -16,10 +19,9 @@ router.get('/', function (req, res, next) {
 // admin@admin.com / isAdmin
 router.get('/users', function (req, res, next) {
     if (req.session.userId !== '59e23cb93a71c90a12632213') {
-        return res.render('index', {
-            h1: 'Access Denied!',
-            h2: 'authorities were notified'
-        });
+        var error = new Error('Access denied!');
+        error.status = 401;
+        return next(error);
     } else {
         User.find({}).exec(function (error, users) {
             if (error) {
@@ -46,7 +48,10 @@ router.post('/login', function (req, res, next) {
                 req.session.userId = user._id;
                 // temp
                 // todo access tokens
-                return res.send(req.session.userId);
+                //return res.send(req.session.userId);
+                var token = jwt.sign({ userId: user._id }, 'This is very secret string');
+                console.log(token);
+                return res.send(token);
             }
         });
     } else {
@@ -221,7 +226,7 @@ router.put('/update/:id', function (req, res, next) {
 });
 
 // REMOVE NOTE
-router.delete('/delete/:id', function (req, res, next) {
+router.delete('/delete/:id', middleware.verify, function (req, res, next) {
     var currentUser = req.session.userId;
 
     if (!currentUser) {
@@ -244,9 +249,8 @@ router.delete('/delete/:id', function (req, res, next) {
 });
 
 // GET ALL NOTES
-router.get('/notes', function(req, res, next) {
-    var currentUser = req.session.userId;
-
+router.get('/notes', middleware.verify, function(req, res, next) {
+    var currentUser = req.currentUser;
     if (!currentUser) {
         var error = new Error('Unauthorized!');
         error.status = 401;
