@@ -8,7 +8,7 @@ var NoteSchema = new mongoose.Schema({
     notes: [{
         title: {
             type: String,
-            required: false,
+            required: true,
             unique: false
         },
         description: {

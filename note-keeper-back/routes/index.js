@@ -151,12 +151,10 @@ router.post('/api/add', middleware.verify, function (req, res, next) {
                     if (error) {
                         return next(error);
                     }
-                    // temp
-                    return res.send(response);
+                    return res.json({ added: true });
                 });
             }
-            // temp
-            return res.send(response);
+            return res.json({ added: true });
         }
     );
 });
