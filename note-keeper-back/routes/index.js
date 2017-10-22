@@ -1,6 +1,5 @@
 var express = require('express');
 var mongoose = require('mongoose');
-var expressJWT = require('express-jwt');
 var jwt = require('jsonwebtoken');
 var User = require('../models/user');
 var Note = require('../models/note');
@@ -11,20 +10,21 @@ var router = express.Router();
 router.get('/', function (req, res, next) {
     return res.render('index', {
         h1: 'Note Keeper Server',
-        h2: 'authentication is required'
+        h2: 'Authentication is required'
     });
 });
 
 // get users (for admin use only)
 // admin@admin.com / isAdmin
-router.get('/users', function (req, res, next) {
-    if (req.session.userId !== '59e23cb93a71c90a12632213') {
-        var error = new Error('Access denied!');
+router.get('/users', middleware.verify, function (req, res, next) {
+    if (req.user.userId !== '59e23cb93a71c90a12632213') {
+        var error = new Error('User unauthorized. Admin use only.');
         error.status = 401;
         return next(error);
     } else {
         User.find({}).exec(function (error, users) {
             if (error) {
+                error.status = 400;
                 return next(error);
             } else {
                 res.send(users);
@@ -34,7 +34,7 @@ router.get('/users', function (req, res, next) {
 });
 
 // login
-router.post('/login', function (req, res, next) {
+router.post('/api/login', function (req, res, next) {
     var email = req.body.email;
     var password = req.body.password;
 
@@ -45,13 +45,9 @@ router.post('/login', function (req, res, next) {
                 error.status = 401;
                 return next(error);
             } else {
-                req.session.userId = user._id;
-                // temp
-                // todo access tokens
-                //return res.send(req.session.userId);
-                var token = jwt.sign({ userId: user._id }, 'This is very secret string');
-                console.log(token);
-                return res.send(token);
+                // create and send access token
+                var token = jwt.sign({ userId: user._id }, 'thisisverysecretstring');
+                return res.json({ token });
             }
         });
     } else {
@@ -61,8 +57,9 @@ router.post('/login', function (req, res, next) {
     }
 });
 
-// logout
-router.post('/logout', function (req, res, next) {
+// logout (for sessions)
+/*
+router.post('/api/logout', function (req, res, next) {
     if (req.session) {
         req.session.destroy(function (error) {
             if (error) {
@@ -73,16 +70,17 @@ router.post('/logout', function (req, res, next) {
         });
     }
 });
+*/
 
 // register new user
-router.post('/register', function (req, res, next) {
+router.post('/api/register', function (req, res, next) {
     var email = req.body.email;
     var password = req.body.password;
     var confirmPassword = req.body.confirmPassword;
 
     if (email && password) {
         if (password !== confirmPassword) {
-            var error = new Error('Password mismatch!');
+            var error = new Error('Password did not match!');
             error.status = 400;
             return next(error);
         }
@@ -94,10 +92,9 @@ router.post('/register', function (req, res, next) {
             if (error) {
                 return next(error);
             } else {
-                req.session.userId = user._id;
-                // temp
-                // todo access tokens
-                return res.send(req.session.userId);
+                // create and send access token
+                var token = jwt.sign({ userId: user._id }, 'thisisverysecretstring');
+                return res.json({ token });
             }
         });
     } else {
@@ -110,11 +107,11 @@ router.post('/register', function (req, res, next) {
 // NOTES ->
 
 // ADD NEW
-router.post('/add', function (req, res, next) {
-    var currentUser = req.session.userId;
+router.post('/api/add', middleware.verify, function (req, res, next) {
+    var currentUser = req.user.userId;
 
     if (!currentUser) {
-        var error = new Error('Unauthorized!');
+        var error = new Error('Unauthorized user.');
         error.status = 401;
         return next(error);
     }
@@ -165,11 +162,11 @@ router.post('/add', function (req, res, next) {
 });
 
 // GET NOTE BY ID
-router.get('/notes/:id', function (req, res, next) {
-    var currentUser = req.session.userId;
+router.get('/api/notes/:id', middleware.verify, function (req, res, next) {
+    var currentUser = req.user.userId;
 
     if (!currentUser) {
-        var error = new Error('Unauthorized!');
+        var error = new Error('Unauthorized user.');
         error.status = 401;
         return next(error);
     }
@@ -181,28 +178,29 @@ router.get('/notes/:id', function (req, res, next) {
             if (error) {
                 return next(error);
             }
-            const note = response[0].notes;
-            return res.send(note);
+            var note = response[0].notes;
+            return res.json(note);
         }
     );
 });
 
 // UPDATE NOTE
-router.put('/update/:id', function (req, res, next) {
-    var currentUser = req.session.userId;
+router.put('/api/update/:id', middleware.verify, function (req, res, next) {
+    var currentUser = req.user.userId;
 
     if (!currentUser) {
-        var error = new Error('Unauthorized!');
+        var error = new Error('Unauthorized user.');
         error.status = 401;
         return next(error);
     }
 
     // prevent empty notes
-    if (!req.body.title && !req.body.description) {
-        var error = new Error('Title or description must be filled!');
+    if (!req.body.title || !req.body.description) {
+        var error = new Error('Title and description must be filled!');
         return next(error);
     }
 
+    // TO FIX: smarter way to handle updates, allow users to omit title or desc
     var updated = {
         'notes.$.title': req.body.title,
         'notes.$.description': req.body.description,
@@ -216,60 +214,68 @@ router.put('/update/:id', function (req, res, next) {
         {
             '$set': updated
         },
+        { new: true },
         function (error) {
             if (error) {
                 return next(error);
             }
-            return res.send({ updated: true });
+            return res.json({ updated: true });
         }
     );
 });
 
 // REMOVE NOTE
-router.delete('/delete/:id', middleware.verify, function (req, res, next) {
-    var currentUser = req.session.userId;
+router.delete('/api/delete/:id', middleware.verify, function (req, res, next) {
+    var currentUser = req.user.userId;
 
     if (!currentUser) {
-        var error = new Error('Unauthorized!');
+        var error = new Error('Unauthorized user.');
         error.status = 401;
         return next(error);
     }
 
-    Note.findByIdAndUpdate(currentUser, 
-        { $pull: { notes: { _id: req.params.id }}}, 
-        {new: true}, 
-        function (error, data) {
+    Note.findByIdAndUpdate(currentUser,
+        { $pull: { notes: { _id: req.params.id } } },
+        { new: true },
+        function (error) {
             if (error) {
                 return next(error);
             }
-            // temp
-            return res.send(data);
+            return res.json({ deleted: true });
         }
     );
 });
 
 // GET ALL NOTES
-router.get('/notes', middleware.verify, function(req, res, next) {
-    var currentUser = req.currentUser;
+router.get('/api/notes', middleware.verify, function (req, res, next) {
+    var currentUser = req.user.userId;
+
     if (!currentUser) {
-        var error = new Error('Unauthorized!');
+        var error = new Error('Unauthorized user.');
         error.status = 401;
         return next(error);
     }
 
     if (req.query['priority'] == 1) {
-        Note.findById(currentUser, function(error, response) {
+        Note.findById(currentUser, function (error, response) {
             var data = response.notes.sort();
-            return res.send(data);
+            return res.json(data);
         });
     } else {
-        Note.findById(currentUser, function(error, response) {
+        Note.findById(currentUser, function (error, response) {
             if (error) {
                 return next(error);
             }
-            return res.send(response.notes);
+            return res.json(response.notes);
         });
     }
+});
+
+// 404
+router.get('*', function (req, res, next) {
+    var error = new Error('Not found');
+    error.status = 404;
+    return next(error);
 });
 
 module.exports = router;
