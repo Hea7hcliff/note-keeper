@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text } from 'react-native';
+import axios from 'axios';
+import { Text, TouchableWithoutFeedback, View } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { Card, CardSection } from './common';
 
@@ -22,8 +23,30 @@ const priorityColors = {
 };
 
 class Note extends React.Component {
+
+    onChangeToDone(title, description, priority, id) {
+        axios.put('http://84.251.221.123:3000/api/update/' + id, { title, description, priority, done: true })
+        .then((response) => {
+            console.log(response.data);
+        })
+        .catch((error) => {
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                console.log(error.response.data);
+                console.log(error.response.status);
+                console.log(error.response.headers);
+              } else if (error.request) {
+                // The request was made but no response was received
+                console.log(error.request);
+              } else {
+                // Something happened in setting up the request that triggered an Error
+                console.log('Error', error.message);
+              }
+        });
+    }
+
     render() {
-        const { title, desc, priority } = this.props.note;
+        const { title, description, priority, _id } = this.props.note;
         const colorCode = priorityColors[priority];
         const { marginTop } = this.props.style;
 
@@ -37,7 +60,11 @@ class Note extends React.Component {
             >
                 <CardSection>
                     <Text style={{ color: colorCode, fontSize: 20 }}>{title}</Text>
-                    <DoneIcon />
+                    <TouchableWithoutFeedback onPress={() => this.onChangeToDone(title, description, priority, _id)}>
+                        <View>
+                            <DoneIcon />
+                        </View>
+                    </TouchableWithoutFeedback>
                 </CardSection>
                 <CardSection 
                     style={{ 
@@ -46,7 +73,7 @@ class Note extends React.Component {
                         borderBottomWidth: 0 
                     }}
                 >
-                    <Text style={styles.descStyle}>{desc}</Text>
+                    <Text style={styles.descStyle}>{description}</Text>
                 </CardSection>
             </Card>
         );

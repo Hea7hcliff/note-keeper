@@ -1,5 +1,8 @@
 {
   "expoServerPort": 19000,
   "packagerPort": 19001,
-  "packagerPid": 3500
+  "packagerPid": 6952,
+  "expoServerNgrokUrl": "https://h8-74x.miggooo.note-keeper-front.exp.direct",
+  "packagerNgrokUrl": "https://packager.h8-74x.miggooo.note-keeper-front.exp.direct",
+  "ngrokPid": 4872
 }

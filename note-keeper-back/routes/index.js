@@ -160,8 +160,8 @@ router.post('/api/add', middleware.verify, function (req, res, next) {
 });
 
 // GET NOTE BY ID
-router.get('/api/notes/:id', middleware.verify, function (req, res, next) {
-    var currentUser = req.user.userId;
+router.get('/api/notes/:id', function (req, res, next) {
+    var currentUser = '59e23e67d525740a2f6b16a1';
 
     if (!currentUser) {
         var error = new Error('Unauthorized user.');
@@ -183,8 +183,8 @@ router.get('/api/notes/:id', middleware.verify, function (req, res, next) {
 });
 
 // UPDATE NOTE
-router.put('/api/update/:id', middleware.verify, function (req, res, next) {
-    var currentUser = req.user.userId;
+router.put('/api/update/:id', function (req, res, next) {
+    var currentUser = '59e23e67d525740a2f6b16a1';
 
     if (!currentUser) {
         var error = new Error('Unauthorized user.');
@@ -245,8 +245,8 @@ router.delete('/api/delete/:id', middleware.verify, function (req, res, next) {
 });
 
 // GET ALL NOTES
-router.get('/api/notes', middleware.verify, function (req, res, next) {
-    var currentUser = req.user.userId;
+router.get('/api/notes', function (req, res, next) {
+    var currentUser = '59e23e67d525740a2f6b16a1'
 
     if (!currentUser) {
         var error = new Error('Unauthorized user.');
@@ -260,11 +260,13 @@ router.get('/api/notes', middleware.verify, function (req, res, next) {
             return res.json(data);
         });
     } else {
-        Note.findById(currentUser, function (error, response) {
+        Note.find({}).exec(function (error, notes) {
             if (error) {
+                error.status = 400;
                 return next(error);
+            } else {
+                res.send(notes);
             }
-            return res.json(response.notes);
         });
     }
 });
