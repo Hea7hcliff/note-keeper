@@ -1,5 +1,6 @@
 import React from 'react';
 import { Router, Stack, Scene, Tabs, ActionConst, Actions } from 'react-native-router-flux';
+import { AsyncStorage } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { Constants } from 'expo';
 import Auth from './components/Auth';
@@ -14,7 +15,11 @@ const LogoutIcon = () => {
             color="#32292f" 
             type="entypo" 
             style={styles.iconStyle} 
-            onPress={() => Actions.authStack()} 
+            onPress={() => {
+                AsyncStorage.removeItem('token', () => {
+                    Actions.authStack();
+                });
+            }} 
         />
     );
 };
@@ -44,12 +49,6 @@ const BackIcon = () => {
     );
 };
 
-/**
-const RemoveIcon = () => {
-    return <Icon name="minus" color="#7a918d" />;
-};
-**/
-
 const ListIcon = ({ focused }) => {
     const iconStyle = { color: focused ? '#5cb85c' : '#CFDBD5' };
     return <Icon name="list" color={iconStyle.color} size={30} />;
@@ -60,7 +59,8 @@ const DoneIcon = ({ focused }) => {
     return <Icon name="check" color={iconStyle.color} size={30} />;
 };
 
-const AppRouter = () => {
+const AppRouter = (props) => {
+    console.log('Mikko', props.token);
     return (
         <Router>
             <Stack key="root" hideNavBar>
@@ -90,7 +90,7 @@ const AppRouter = () => {
                             title="Notes"
                             navigationBarStyle={styles.headerStyle} 
                             titleStyle={styles.titleStyle}
-                            tabBarLabel={ListIcon} 
+                            tabBarLabel={ListIcon}  
                         />
                         <Scene
                             key="archive"

@@ -1,15 +1,28 @@
 import React from 'react';
-import axios from 'axios';
-import { Text, TouchableWithoutFeedback, View } from 'react-native';
+import { connect } from 'react-redux';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { Card, CardSection } from './common';
+import { doneNote, deleteNote } from '../actions/IoActions';
 
 const DoneIcon = () => {
     return (
         <Icon
             name="check-circle-outline"
             type="material-community"
-            color='#CFDBD5' 
+            color='#5cb85c' 
+            size={36}
+            style={{ marginRight: 3 }}
+        />
+    );
+};
+
+const RemoveIcon = () => {
+    return (
+        <Icon 
+            name="minus-circle-outline" 
+            type="material-community"
+            color="#d9534f" 
             size={36}
             style={{ marginRight: 3 }}
         />
@@ -18,53 +31,39 @@ const DoneIcon = () => {
 
 const priorityColors = {
     0: '#d9534f',
-    1: '#5cb85c',
-    2: '#5bc0de'
+    1: '#FFB300',
+    2: '#5cb85c',
+    3: '#5bc0de'
 };
 
 class Note extends React.Component {
 
-    onChangeToDone(title, description, priority, id) {
-        axios.put('http://84.251.221.123:3000/api/update/' + id, { title, description, priority, done: true })
-        .then((response) => {
-            console.log(response.data);
-        })
-        .catch((error) => {
-            if (error.response) {
-                // The request was made and the server responded with a status code
-                console.log(error.response.data);
-                console.log(error.response.status);
-                console.log(error.response.headers);
-              } else if (error.request) {
-                // The request was made but no response was received
-                console.log(error.request);
-              } else {
-                // Something happened in setting up the request that triggered an Error
-                console.log('Error', error.message);
-              }
-        });
+    onChange() {
+        if (this.props.isDone) {
+            this.props.deleteNote(this.props);
+        } else {
+            this.props.doneNote(this.props);
+        }
     }
 
     render() {
-        const { title, description, priority, _id } = this.props.note;
+        const { title, description, priority } = this.props.note;
         const colorCode = priorityColors[priority];
-        const { marginTop } = this.props.style;
 
         return (
             <Card
                 style={{
-                    marginTop,
                     borderLeftWidth: 3,
                     borderLeftColor: colorCode
                 }}
             >
                 <CardSection>
                     <Text style={{ color: colorCode, fontSize: 20 }}>{title}</Text>
-                    <TouchableWithoutFeedback onPress={() => this.onChangeToDone(title, description, priority, _id)}>
+                    <TouchableOpacity onPress={() => this.onChange()}>
                         <View>
-                            <DoneIcon />
+                            {this.props.isDone ? <RemoveIcon /> : <DoneIcon />}
                         </View>
-                    </TouchableWithoutFeedback>
+                    </TouchableOpacity>
                 </CardSection>
                 <CardSection 
                     style={{ 
@@ -95,4 +94,11 @@ const styles = {
     }
 };
 
-export default Note;
+const mapStateToProps = ({ auth }) => {
+    const { token } = auth;
+    return {
+        token
+    };
+};
+
+export default connect(mapStateToProps, { doneNote, deleteNote })(Note);

@@ -1,9 +1,11 @@
 import React from 'react';
-import { Actions } from 'react-native-router-flux';
+import { connect } from 'react-redux';
 import { Text, View, AsyncStorage } from 'react-native';
 import { Button } from 'react-native-elements';
 import { Constants } from 'expo';
 import AuthModal from './AuthModal';
+import { getToken } from '../actions';
+
 
 class Auth extends React.Component {
     state = {
@@ -17,9 +19,10 @@ class Auth extends React.Component {
     async getData() {
         try {
             const token = await AsyncStorage.getItem('token');
+            console.log(token);
             if (token !== null) {
-                console.log('storage', token);
-                Actions.mainStack();
+                console.log(token);
+                this.props.getToken(token);
             }
         } catch (error) {
             console.log('Error getting data:', error);
@@ -27,6 +30,7 @@ class Auth extends React.Component {
     }
 
     render() {
+        console.log('Reducer store:', this.props);
         return (
             <View style={styles.container}>
                 <Text h1 style={styles.titleStyle}>Note Keeper</Text>
@@ -35,13 +39,13 @@ class Auth extends React.Component {
                         buttonStyle={styles.buttonStyle}
                         textStyle={{ textAlign: 'center', color: '#32292f', fontSize: 18 }}
                         title={'LOGIN'} 
-                        onPress={() => this.setState({ showModal: true })}
+                        onPress={() => this.setState({ showModal: true, register: false })}
                     />
                     <Button
                         buttonStyle={styles.buttonStyle}
                         textStyle={{ textAlign: 'center', color: '#32292f', fontSize: 18 }}
                         title={'REGISTER'}
-                        onPress={() => this.setState({ showModal: true })}
+                        onPress={() => this.setState({ showModal: true, register: true })}
                     />
                 </View>
                 <Text style={styles.descStyle}>
@@ -50,6 +54,7 @@ class Auth extends React.Component {
                 </Text>
                 <AuthModal
                     visible={this.state.showModal} 
+                    register={this.state.register}
                     onDismiss={() => this.setState({ showModal: false })}
                 />
             </View>
@@ -85,4 +90,11 @@ const styles = {
     }
 };
 
-export default Auth;
+const mapStateToProps = ({ auth }) => {
+    const { email, password, token } = auth;
+    return {
+        email, password, token
+    };
+};
+
+export default connect(mapStateToProps, { getToken })(Auth);
