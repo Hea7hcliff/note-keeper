@@ -61,7 +61,7 @@ class AuthModal extends React.Component {
                     <View style={styles.innerStyle}>
                         {!this.props.register && <Text style={styles.textStyle}>
                             Tip: longpress on a note card to edit.
-                            This is as complicated as this app gets.
+                            This is as complicated as this gets. (Doesn't actually work)
                         </Text>}
                         <View>
                             <FormLabel>Enter your email</FormLabel>
