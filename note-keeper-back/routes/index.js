@@ -92,6 +92,16 @@ router.post('/api/register', function (req, res, next) {
             if (error) {
                 return next(error);
             } else {
+                var noteData = {
+                    _id: user._id,
+                    notes: []
+                }
+                Note.create(noteData, function (error) {
+                    if (error) {
+                        return next(error);
+                    }
+                    // return res.json({ added: true });
+                });
                 // create and send access token
                 var token = jwt.sign({ userId: user._id }, 'thisisverysecretstring');
                 return res.json({ token });
