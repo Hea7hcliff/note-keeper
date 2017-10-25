@@ -1,9 +1,9 @@
 {
   "expo": {
     "name": "Note Keeper",
-    "icon": "./favicon.ico",
+    "icon": "./icon.png",
     "version": "0.1.0",
-    "slug": "exp.host/@aveselovski/note-keeper",
+    "slug": "notekeeper",
     "privacy": "unlisted",
     "sdkVersion": "21.0.0",
     "ios": {
