@@ -1,7 +1,6 @@
 import React from 'react';
 import { Actions } from 'react-native-router-flux';
-// import { connect } from 'react-redux';
-import { View, Text, Modal, AsyncStorage } from 'react-native';
+import { View, Text, Modal, AsyncStorage, Vibration } from 'react-native';
 import { FormLabel, FormInput, Button } from 'react-native-elements';
 import { Login, Register } from '../io';
 
@@ -23,6 +22,7 @@ class AuthModal extends React.Component {
     }
 
     onModalPress = () => {
+        Vibration.vibrate(20);
         const { email, password, confirmPassword } = this.state;
         if (this.props.register) {
             Register({ email, password, confirmPassword })

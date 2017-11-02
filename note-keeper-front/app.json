@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "Note Keeper",
-    "icon": "./icon.png",
-    "version": "0.1.0",
+    "icon": "./app-icon.png",
+    "version": "0.2.2",
     "slug": "notekeeper",
     "privacy": "unlisted",
     "sdkVersion": "21.0.0",
@@ -11,6 +11,10 @@
     },
     "android": {
         "package": "com.amp.notekeeper" 
+    },
+    "splash": {
+        "backgroundColor": "#1a1a1a",
+        "image": "./splash-icon.png"
     }
   }
 }

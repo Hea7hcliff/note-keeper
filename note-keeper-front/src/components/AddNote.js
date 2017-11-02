@@ -1,13 +1,12 @@
 import React from 'react';
-// import { Actions } from 'react-native-router-flux';
 import { connect } from 'react-redux';
-import { View, Picker } from 'react-native';
+import { View, Picker, Vibration } from 'react-native';
 import { FormLabel, FormInput, Button } from 'react-native-elements';
 import { addNote } from '../actions/IoActions';
 
 class AddNote extends React.Component {
     state = {
-        priority: 0,
+        priority: 3,
         title: '',
         description: ''
     }
@@ -23,6 +22,7 @@ class AddNote extends React.Component {
         this.setState({ description: value });
     }
     onSubmit = () => {
+        Vibration.vibrate(20);
         if (this.state.title !== '' && this.state.description !== '') {
             const { token } = this.props;
             const data = { token, ...this.state };
@@ -38,7 +38,7 @@ class AddNote extends React.Component {
                     onChangeText={this.onChangeTitle} 
                     value={this.state.title}
                 />
-                <FormLabel labelStyle={styles.labelStyle}>Note</FormLabel>
+                <FormLabel labelStyle={styles.labelStyle}>Description</FormLabel>
                 <FormInput
                     multiline
                     numberOfLines={2}
@@ -51,10 +51,10 @@ class AddNote extends React.Component {
                     onValueChange={this.onPriorityChange}
                     style={styles.pickerStyle}
                 >
-                    <Picker.Item label="Very Important" value={0} />
-                    <Picker.Item label="Semi Important" value={1} />
-                    <Picker.Item label="Not Important" value={2} />
-                    <Picker.Item label="No Priority" value={3} />
+                    <Picker.Item label="Task: Very Important" value={0} />
+                    <Picker.Item label="Task: Semi Important" value={1} />
+                    <Picker.Item label="Task: Not Important" value={2} />
+                    <Picker.Item label="Note" value={3} />
                 </Picker>
                 <Button
                     buttonStyle={styles.buttonStyle}

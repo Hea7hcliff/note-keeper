@@ -5,7 +5,7 @@ import { ListView, AsyncStorage } from 'react-native';
 import Note from './Note';
 import { getNotes, registerToken } from '../actions';
 
-class NoteList extends React.Component {
+class TaskList extends React.Component {
     componentWillMount() {
         this.getData();
         this.createDataSource(this.props);
@@ -33,7 +33,7 @@ class NoteList extends React.Component {
     }
     renderRow(note) {
         if (note !== undefined) {
-            return <Note note={note} isNote />;
+            return <Note note={note} isDone={false} />;
         }
         return null;
     }
@@ -55,7 +55,7 @@ class NoteList extends React.Component {
 const mapStateToProps = ({ auth, data }) => {
     const { token } = auth;
     const notes = _.map(data, (val) => {
-        if (val.priority === 3) {
+        if (val.done === false && val.priority !== 3) {
             return val;
         }
     });
@@ -64,4 +64,4 @@ const mapStateToProps = ({ auth, data }) => {
     };
 };
 
-export default connect(mapStateToProps, { getNotes, registerToken })(NoteList);
+export default connect(mapStateToProps, { getNotes, registerToken })(TaskList);

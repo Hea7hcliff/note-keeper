@@ -3,16 +3,13 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 import { ListView, AsyncStorage } from 'react-native';
 import Note from './Note';
-import { getNotes, getToken } from '../actions';
+import { getNotes, registerToken } from '../actions';
 
-class Archive extends React.Component {
+class DoneList extends React.Component {
     componentWillMount() {
         this.getData();
-        const { token } = this.props;
-        this.props.getNotes(token);
         this.createDataSource(this.props);
     }
-
     componentWillReceiveProps(nextProps) {
         this.createDataSource(nextProps);
     }
@@ -20,17 +17,14 @@ class Archive extends React.Component {
     async getData() {
         try {
             const token = await AsyncStorage.getItem('token');
-            console.log(token);
             if (token !== null) {
-                console.log(token);
-                this.props.getToken(token);
+                this.props.registerToken(token);
                 this.props.getNotes(token);
             }
         } catch (error) {
             console.log('Error getting data:', error);
         }
     }
-
     createDataSource({ notes }) {
         const ds = new ListView.DataSource({
             rowHasChanged: (r1, r2) => r1 !== r2
@@ -38,14 +32,13 @@ class Archive extends React.Component {
         this.dataSource = ds.cloneWithRows(notes);
     }
     renderRow(note) {
-        if (note.done === true) {
+        if (note !== undefined) {
             return <Note note={note} isDone />;
         }
         return null;
     }
 
     render() {
-        console.log('Store:', this.props.notes);
         return (
             <ListView
                 enableEmptySections 
@@ -58,14 +51,17 @@ class Archive extends React.Component {
     }
 }
 
-const mapStateToProps = ({ auth, list }) => {
+
+const mapStateToProps = ({ auth, data }) => {
     const { token } = auth;
-    const notes = _.map(list, (val, uid) => {
-        return { ...val, uid };
+    const notes = _.map(data, (val) => {
+        if (val.done === true && val.priority !== 3) {
+            return val;
+        }
     });
     return {
         token, notes
     };
 };
 
-export default connect(mapStateToProps, { getNotes, getToken })(Archive);
+export default connect(mapStateToProps, { getNotes, registerToken })(DoneList);

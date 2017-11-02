@@ -1,17 +1,21 @@
 import {
-    GET_TOKEN 
+    REGISTER_TOKEN, 
+    USER_LOADED
 } from '../actions/types';
 
 const INITIAL_STATE = {
     token: null,
     email: '',
-    password: ''
+    password: '',
+    userLoaded: true
 };
 
 export default (state = INITIAL_STATE, action) => {
     switch (action.type) {
-        case GET_TOKEN:
+        case REGISTER_TOKEN:
             return { ...state, token: action.payload };
+        case USER_LOADED:
+            return { ...state, userLoaded: action.payload };
         default: 
             return state;
     }

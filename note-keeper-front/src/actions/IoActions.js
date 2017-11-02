@@ -40,7 +40,33 @@ export const doneNote = (data) => {
 
     const headers = { Authorization: `Bearer ${token}` };
     return (dispatch) => {
-        axios.put(`${config.api_url}update/${_id}`, { title, description, priority, done: true }, { headers })
+        axios.put(`${config.api_url}update/${_id}`, { 
+            title, 
+            description, 
+            priority, 
+            done: true 
+        }, { headers })
+        .then(() => {
+            dispatch(getNotes(token));
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+    };
+};
+
+export const undoNote = (data) => {
+    const { token } = data;
+    const { title, description, priority, _id } = data.note;
+
+    const headers = { Authorization: `Bearer ${token}` };
+    return (dispatch) => {
+        axios.put(`${config.api_url}update/${_id}`, { 
+            title, 
+            description, 
+            priority, 
+            done: false 
+        }, { headers })
         .then(() => {
             dispatch(getNotes(token));
         })
@@ -69,7 +95,6 @@ export const addNote = (data) => {
 export const deleteNote = (data) => {
     const { token } = data;
     const { _id } = data.note;
-    console.log(_id, token);
 
     const headers = { Authorization: `Bearer ${token}` };
     return (dispatch) => {

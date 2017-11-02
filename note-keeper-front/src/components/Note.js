@@ -1,18 +1,19 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View, Vibration } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { Card, CardSection } from './common';
-import { doneNote, deleteNote } from '../actions/IoActions';
+import DeleteModal from './DeleteModal';
+import { doneNote, undoNote } from '../actions/IoActions';
 
 const DoneIcon = () => {
     return (
         <Icon
-            name="check-circle-outline"
+            name="check"
             type="material-community"
             color='#5cb85c' 
-            size={36}
-            style={{ marginRight: 3 }}
+            size={30}
+            style={{ margin: 2, marginLeft: 3 }}
         />
     );
 };
@@ -20,11 +21,23 @@ const DoneIcon = () => {
 const RemoveIcon = () => {
     return (
         <Icon 
-            name="minus-circle-outline" 
+            name="minus" 
+            type="material-community"
+            color="#FFB300" 
+            size={34}
+            style={{ marginLeft: 1 }}
+        />
+    );
+};
+
+const DeleteIcon = () => {
+    return (
+        <Icon 
+            name="delete" 
             type="material-community"
             color="#d9534f" 
-            size={36}
-            style={{ marginRight: 3 }}
+            size={28}
+            style={{ marginTop: 3, marginLeft: 4 }}
         />
     );
 };
@@ -37,13 +50,38 @@ const priorityColors = {
 };
 
 class Note extends React.Component {
+    state = {
+        showModal: false
+    }
 
-    onChange() {
+    onPressChange() {
         if (this.props.isDone) {
-            this.props.deleteNote(this.props);
-        } else {
+            Vibration.vibrate(20);
+            this.props.undoNote(this.props);
+        }
+        if (!this.props.isDone && !this.props.isNote) {
+            Vibration.vibrate(20);
             this.props.doneNote(this.props);
         }
+        return null; 
+    }
+
+    onLongPressChange() {
+        if (this.props.isDone || this.props.isNote) {
+            Vibration.vibrate(30);
+            this.setState({ showModal: true });
+        }
+        return null;
+    }
+
+    buttonType = () => {
+        if (this.props.isNote) {
+            return <DeleteIcon />;
+        }
+        if (this.props.isDone) {
+            return <RemoveIcon />;
+        }
+        return <DoneIcon />;
     }
 
     render() {
@@ -59,9 +97,13 @@ class Note extends React.Component {
             >
                 <CardSection>
                     <Text style={{ color: colorCode, fontSize: 20 }}>{title}</Text>
-                    <TouchableOpacity onPress={() => this.onChange()}>
+                    <TouchableOpacity 
+                        onPress={() => this.onPressChange()} 
+                        onLongPress={() => this.onLongPressChange()} 
+                        style={{ height: 40, width: 40, borderRadius: 100, borderWidth: 2, borderColor: '#CFDBD5' }}
+                    >
                         <View>
-                            {this.props.isDone ? <RemoveIcon /> : <DoneIcon />}
+                            {this.buttonType()}
                         </View>
                     </TouchableOpacity>
                 </CardSection>
@@ -74,6 +116,12 @@ class Note extends React.Component {
                 >
                     <Text style={styles.descStyle}>{description}</Text>
                 </CardSection>
+                <DeleteModal
+                    noteDetails={this.props} 
+                    message={this.props.isNote ? 'Delete this note?' : 'Delete this task?'}
+                    visible={this.state.showModal}
+                    onDismiss={() => this.setState({ showModal: false })}
+                />
             </Card>
         );
     }
@@ -101,4 +149,4 @@ const mapStateToProps = ({ auth }) => {
     };
 };
 
-export default connect(mapStateToProps, { doneNote, deleteNote })(Note);
+export default connect(mapStateToProps, { doneNote, undoNote })(Note);
