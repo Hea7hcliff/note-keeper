@@ -1,16 +1,14 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { View, Text, Modal, Vibration } from 'react-native';
+import { View, Text, Modal } from 'react-native';
 import { Button } from 'react-native-elements';
 import { deleteNote } from '../actions/IoActions';
 
 class DeleteModal extends React.Component {
     onCancelPress = () => {
-        Vibration.vibrate(20);
         this.props.onDismiss();
     }
     onConfirmPress = () => {
-        Vibration.vibrate(20);
         const { noteDetails } = this.props;
         this.props.deleteNote(noteDetails);
     }

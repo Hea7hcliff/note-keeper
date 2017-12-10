@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Text, View, AsyncStorage, ActivityIndicator, Vibration } from 'react-native';
+import { Text, View, AsyncStorage, ActivityIndicator } from 'react-native';
 import { Button } from 'react-native-elements';
 import { Constants } from 'expo';
 import AuthModal from './AuthModal';
@@ -19,7 +19,8 @@ class Auth extends React.Component {
         try {
             const token = await AsyncStorage.getItem('token');
             if (token !== null) {
-                this.props.registerToken(token);
+                const { navigate } = this.props.navigation;
+                this.props.registerToken(token, navigate);
                 this.props.userLoading(false);
             }
             this.props.userLoading(false);
@@ -37,7 +38,6 @@ class Auth extends React.Component {
                         textStyle={{ textAlign: 'center', color: '#32292f', fontSize: 18 }}
                         title={'LOGIN'}
                         onPress={() => {
-                            Vibration.vibrate(20);
                             this.setState({ showModal: true, register: false });
                         }}
                     />
@@ -46,7 +46,6 @@ class Auth extends React.Component {
                         textStyle={{ textAlign: 'center', color: '#32292f', fontSize: 18 }}
                         title={'REGISTER'}
                         onPress={() => {
-                            Vibration.vibrate(20);
                             this.setState({ showModal: true, register: true });
                         }}
                     />
@@ -61,6 +60,7 @@ class Auth extends React.Component {
     }
 
     render() {
+        const { navigate } = this.props.navigation;
         return (
             <View style={styles.container}>
                 <Text h1 style={styles.titleStyle}>Note Keeper</Text>
@@ -73,6 +73,7 @@ class Auth extends React.Component {
                     visible={this.state.showModal}
                     register={this.state.register}
                     onDismiss={() => this.setState({ showModal: false })}
+                    navigate={navigate}
                 />
             </View>
         );

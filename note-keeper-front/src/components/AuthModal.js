@@ -1,6 +1,6 @@
 import React from 'react';
-import { Actions } from 'react-native-router-flux';
-import { View, Text, Modal, AsyncStorage, Vibration } from 'react-native';
+// import { Actions } from 'react-native-router-flux';
+import { View, Text, Modal, AsyncStorage } from 'react-native';
 import { FormLabel, FormInput, Button } from 'react-native-elements';
 import { Login, Register } from '../io';
 
@@ -22,7 +22,6 @@ class AuthModal extends React.Component {
     }
 
     onModalPress = () => {
-        Vibration.vibrate(20);
         const { email, password, confirmPassword } = this.state;
         if (this.props.register) {
             Register({ email, password, confirmPassword })
@@ -41,7 +40,7 @@ class AuthModal extends React.Component {
     async storeData(token) {
         try {
             await AsyncStorage.setItem('token', token);
-            Actions.mainStack();
+            this.props.navigate('Main');
         } catch (error) {
             console.log('Error storing data:', error);
         }
@@ -49,7 +48,6 @@ class AuthModal extends React.Component {
 
     render() {
         const { visible, onDismiss } = this.props;
-
         return (
             <Modal
                 visible={visible}

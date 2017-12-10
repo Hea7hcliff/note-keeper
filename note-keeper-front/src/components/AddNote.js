@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { View, Picker, Vibration } from 'react-native';
+import { View, Picker } from 'react-native';
 import { FormLabel, FormInput, Button } from 'react-native-elements';
 import { addNote } from '../actions/IoActions';
 
@@ -22,7 +22,6 @@ class AddNote extends React.Component {
         this.setState({ description: value });
     }
     onSubmit = () => {
-        Vibration.vibrate(20);
         if (this.state.title !== '' && this.state.description !== '') {
             const { token } = this.props;
             const data = { token, ...this.state };

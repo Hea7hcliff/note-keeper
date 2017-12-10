@@ -56,11 +56,9 @@ class Note extends React.Component {
 
     onPressChange() {
         if (this.props.isDone) {
-            Vibration.vibrate(20);
             this.props.undoNote(this.props);
         }
         if (!this.props.isDone && !this.props.isNote) {
-            Vibration.vibrate(20);
             this.props.doneNote(this.props);
         }
         return null; 

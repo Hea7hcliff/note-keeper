@@ -1,6 +1,6 @@
 import React from 'react';
 import { Router, Stack, Scene, Tabs, ActionConst, Actions } from 'react-native-router-flux';
-import { AsyncStorage, Vibration } from 'react-native';
+import { AsyncStorage } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { Constants } from 'expo';
 import Auth from './components/Auth';
@@ -17,7 +17,6 @@ const LogoutIcon = () => {
             type="entypo" 
             style={styles.iconStyle} 
             onPress={() => {
-                Vibration.vibrate(30);
                 AsyncStorage.removeItem('token', () => {
                     Actions.authStack();
                 });
@@ -35,7 +34,6 @@ const AddIcon = () => {
             size={36} 
             style={styles.iconStyle}
             onPress={() => {
-                Vibration.vibrate(20);
                 Actions.addNote();
             }}
         />
@@ -50,7 +48,6 @@ const BackIcon = () => {
             size={30} 
             style={styles.iconStyle}
             onPress={() => {
-                Vibration.vibrate(20);
                 Actions.pop();
             }}
         />

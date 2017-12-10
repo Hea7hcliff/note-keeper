@@ -18,7 +18,8 @@ class TaskList extends React.Component {
         try {
             const token = await AsyncStorage.getItem('token');
             if (token !== null) {
-                this.props.registerToken(token);
+                console.log('HEIIIII', token);
+                // this.props.registerToken(token);
                 this.props.getNotes(token);
             }
         } catch (error) {
