@@ -29,7 +29,20 @@ var NoteSchema = new mongoose.Schema({
         modifiedDate: {
             type: Date,
             default: Date.now
-        } 
+        },
+        dueDate: {
+            type: Date,
+            default: null
+        },
+        list: [{
+            name: {
+                type: String
+            },
+            checkbox: {
+                type: Boolean,
+                default: false
+            }
+        }]
     }]
 });
 

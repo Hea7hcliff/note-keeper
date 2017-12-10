@@ -136,7 +136,9 @@ router.post('/api/add', middleware.verify, function (req, res, next) {
     var note = {
         title: req.body.title,
         description: req.body.description,
-        priority: req.body.priority
+        priority: req.body.priority,
+        dueDate: req.body.dueDate,
+        list: req.body.list
     };
 
     /*
@@ -214,7 +216,9 @@ router.put('/api/update/:id', middleware.verify, function (req, res, next) {
         'notes.$.description': req.body.description,
         'notes.$.priority': req.body.priority,
         'notes.$.done': req.body.done,
-        'notes.$.modifiedDate': new Date().toISOString()
+        'notes.$.modifiedDate': new Date().toISOString(),
+        'notes.$.dueDate' : req.body.dueDate,
+        'notes.$.list': req.body.list
     }
 
     Note.update(
