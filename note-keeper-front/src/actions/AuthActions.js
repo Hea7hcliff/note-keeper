@@ -1,7 +1,10 @@
-// import { Actions } from 'react-native-router-flux';
 import { 
     REGISTER_TOKEN, 
-    USER_LOADED
+    USER_LOADING,
+    EMAIL_CHANGED,
+    PASSWORD_CHANGED,
+    CONFIRM_PASSWORD_CHANGED,
+    RESET_CREDENTIALS
 } from './types';
 
 export const registerToken = (token, navigate) => {
@@ -14,9 +17,36 @@ export const registerToken = (token, navigate) => {
     };
 };
 
-export const userLoading = (check) => {
+export const emailChanged = email => {
     return {
-        type: USER_LOADED,
-        payload: check
+        type: EMAIL_CHANGED,
+        payload: email
+    };
+};
+
+export const passwordChanged = password => {
+    return {
+        type: PASSWORD_CHANGED,
+        payload: password
+    };
+};
+
+export const confirmPAsswordChanged = confirmPassword => {
+    return {
+        type: CONFIRM_PASSWORD_CHANGED,
+        payload: confirmPassword
+    };
+};
+
+export const userLoading = loading => {
+    return {
+        type: USER_LOADING,
+        payload: loading
+    };
+};
+
+export const resetCredentials = () => {
+    return {
+        type: RESET_CREDENTIALS
     };
 };

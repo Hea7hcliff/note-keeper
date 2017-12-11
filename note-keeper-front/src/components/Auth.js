@@ -4,7 +4,15 @@ import { Text, View, AsyncStorage, ActivityIndicator } from 'react-native';
 import { Button } from 'react-native-elements';
 import { Constants } from 'expo';
 import AuthModal from './AuthModal';
-import { registerToken, userLoading } from '../actions';
+import {
+    registerToken,
+    emailChanged,
+    passwordChanged,
+    confirmPAsswordChanged,
+    userLoading, 
+    resetCredentials 
+} from '../actions';
+import { Login, Register } from '../io';
 
 
 class Auth extends React.Component {
@@ -12,30 +20,69 @@ class Auth extends React.Component {
         showModal: false
     }
 
+    componentWillMount() {
+        this.props.userLoading(true);
+    }
+
     componentDidMount() {
         this.getData();
     }
+
+    onModalPress = () => {
+        const { email, password, confirmPassword } = this.props;
+        this.props.userLoading(true);
+        if (this.state.register) {
+            Register({ email, password, confirmPassword })
+                .then((token) => {
+                    this.storeData(token);
+                });
+        } else {
+            Login({ email, password })
+                .then((token) => {
+                    this.storeData(token);
+                });
+        }
+    }
+
+    onEmailChange = (value) => {
+        this.props.emailChanged(value);
+    }
+    onPasswordChange = (value) => {
+        this.props.passwordChanged(value);
+    }
+    onConfirmPasswordChange = (value) => {
+        this.props.confirmPAsswordChanged(value);
+    }
+
     async getData() {
         try {
             const token = await AsyncStorage.getItem('token');
             if (token !== null) {
                 const { navigate } = this.props.navigation;
                 this.props.registerToken(token, navigate);
-                this.props.userLoading(false);
-            }
-            this.props.userLoading(false);
+            } else this.props.userLoading(false);
         } catch (error) {
             console.log('Error getting data:', error);
         }
     }
+    async storeData(token) {
+        try {
+            await AsyncStorage.setItem('token', token);
+            const { navigate } = this.props.navigation;
+            this.props.resetCredentials();
+            navigate('Main');
+        } catch (error) {
+            console.log('Error storing data:', error);
+        }
+    }
 
     renderLogin = () => {
-        if (!this.props.userLoaded) {
+        if (!this.props.userLoadingStatus) {
             return (
-                <View>
+                <View style={styles.loginContainerStyle}>
                     <Button
                         buttonStyle={styles.buttonStyle}
-                        textStyle={{ textAlign: 'center', color: '#32292f', fontSize: 18 }}
+                        textStyle={styles.textStyle}
                         title={'LOGIN'}
                         onPress={() => {
                             this.setState({ showModal: true, register: false });
@@ -43,7 +90,7 @@ class Auth extends React.Component {
                     />
                     <Button
                         buttonStyle={styles.buttonStyle}
-                        textStyle={{ textAlign: 'center', color: '#32292f', fontSize: 18 }}
+                        textStyle={styles.textStyle}
                         title={'REGISTER'}
                         onPress={() => {
                             this.setState({ showModal: true, register: true });
@@ -53,7 +100,7 @@ class Auth extends React.Component {
             );
         }
         return (
-            <View>
+            <View style={styles.loginContainerStyle}>
                 <ActivityIndicator size='large' />
             </View>
         );
@@ -61,8 +108,9 @@ class Auth extends React.Component {
 
     render() {
         const { navigate } = this.props.navigation;
+        const { email, password, confirmPassword } = this.props;
         return (
-            <View style={styles.container}>
+            <View style={styles.containerStyle}>
                 <Text h1 style={styles.titleStyle}>Note Keeper</Text>
                 {this.renderLogin()}
                 <Text style={styles.descStyle}>
@@ -70,18 +118,26 @@ class Auth extends React.Component {
                     {'\n'}As simple as your cousin Dwayne.
                 </Text>
                 <AuthModal
-                    visible={this.state.showModal}
-                    register={this.state.register}
-                    onDismiss={() => this.setState({ showModal: false })}
-                    navigate={navigate}
+                    visible={this.state.showModal} 
+                    register={this.state.register} 
+                    onDismiss={() => this.setState({ showModal: false })} 
+                    onModalPress={this.onModalPress} 
+                    navigate={navigate} 
+                    onEmailChange={this.onEmailChange} 
+                    email={email} 
+                    onPasswordChange={this.onPasswordChange} 
+                    password={password}
+                    onConfirmPasswordChange={this.onConfirmPasswordChange} 
+                    confirmPassword={confirmPassword} 
                 />
             </View>
         );
     }
 }
 
+
 const styles = {
-    container: {
+    containerStyle: {
         flex: 1,
         backgroundColor: '#FFFCF9',
         alignItems: 'center',
@@ -105,14 +161,34 @@ const styles = {
         borderWidth: 2,
         marginTop: 20,
         marginBottom: 20
+    },
+    textStyle: {
+        textAlign: 'center',
+        color: '#32292f',
+        fontSize: 18
+    },
+    loginContainerStyle: {
+        height: 200,
+        justifyContent: 'center'
     }
 };
 
+
 const mapStateToProps = ({ auth }) => {
-    const { email, password, token, userLoaded } = auth;
+    const { email, password, confirmPassword, token, userLoadingStatus } = auth;
     return {
-        email, password, token, userLoaded
+        email, password, confirmPassword, token, userLoadingStatus 
     };
 };
 
-export default connect(mapStateToProps, { registerToken, userLoading })(Auth);
+export default connect(
+    mapStateToProps, 
+    { 
+        registerToken, 
+        emailChanged, 
+        passwordChanged, 
+        confirmPAsswordChanged,  
+        userLoading, 
+        resetCredentials 
+    }
+)(Auth);
