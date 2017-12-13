@@ -2,7 +2,7 @@
   "expo": {
     "name": "Note Keeper",
     "icon": "./app-icon.png",
-    "version": "0.2.2",
+    "version": "0.3.0",
     "slug": "notekeeper",
     "privacy": "unlisted",
     "sdkVersion": "21.0.0",
