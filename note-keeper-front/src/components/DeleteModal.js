@@ -11,6 +11,7 @@ class DeleteModal extends React.Component {
     onConfirmPress = () => {
         const { noteDetails } = this.props;
         this.props.deleteNote(noteDetails);
+        this.props.onDismiss();
     }
 
     render() {

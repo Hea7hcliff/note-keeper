@@ -13,11 +13,11 @@ import {
 import { Constants } from 'expo';
 import { Icon } from 'react-native-elements';
 
-import Auth from './components/Auth';
+import Auth from './screens/Auth';
 import TaskList from './components/TaskList';
 import DoneList from './components/DoneList';
 import NoteList from './components/NoteList';
-import AddNote from './components/AddNote';
+import AddNote from './screens/AddNote';
 
 
 // ICONS
@@ -45,7 +45,7 @@ const AddIcon = ({ navigate }) => {
     return (
         <TouchableOpacity
             onPress={() => {
-                navigate('Note');
+                navigate('Note', { type: 'new' });
             }}
         >
             <View style={styles.iconContainer}>
@@ -168,7 +168,13 @@ const Tabs = TabNavigator(
         tabBarPosition: 'bottom',
         tabBarOptions: {
             showIcon: true,
-            showLabel: false
+            showLabel: false,
+            activeTintColor: '#5bc0de',
+            inactiveTintColor: '#CFDBD5',
+            activeBackgroundColor: '#CFDBD5',
+            inactiveBackgroundColor: '#CFDBD5',
+            style: { backgroundColor: '#fff' },
+            indicatorStyle: { backgroundColor: '#5bc0de' }
         }
     }
 );

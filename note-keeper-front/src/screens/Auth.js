@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { Text, View, AsyncStorage, ActivityIndicator } from 'react-native';
 import { Button } from 'react-native-elements';
 import { Constants } from 'expo';
-import AuthModal from './AuthModal';
+import AuthModal from '../components/AuthModal';
 import {
     registerToken,
     emailChanged,

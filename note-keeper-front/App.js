@@ -1,14 +1,25 @@
 import React from 'react';
-import { Provider } from 'react-redux';
+import { Provider, connect } from 'react-redux';
+import { addNavigationHelpers } from 'react-navigation';
 import Root from './src/routes';
 import store from './src/store';
 
-export default class App extends React.Component {
-    render() {
-        return (
-            <Provider store={store}>
-                <Root />
-            </Provider>
-        );
-    }
-}
+const App = ({ dispatch, nav }) => (
+    <Root 
+        navigation={addNavigationHelpers({
+            dispatch,
+            state: nav
+        })}
+    />
+);
+
+const mapStateToProps = state => ({
+    nav: state.nav
+});
+const AppWithNavigation = connect(mapStateToProps)(App);
+
+export default () => (
+    <Provider store={store}>
+        <AppWithNavigation />
+    </Provider>
+);

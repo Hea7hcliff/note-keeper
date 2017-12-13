@@ -10,6 +10,7 @@ class NoteList extends React.Component {
         this.getData();
         this.createDataSource(this.props);
     }
+
     componentWillReceiveProps(nextProps) {
         this.createDataSource(nextProps);
     }
@@ -18,19 +19,20 @@ class NoteList extends React.Component {
         try {
             const token = await AsyncStorage.getItem('token');
             if (token !== null) {
-                this.props.registerToken(token);
                 this.props.getNotes(token);
             }
         } catch (error) {
             console.log('Error getting data:', error);
         }
     }
+
     createDataSource({ notes }) {
         const ds = new ListView.DataSource({
             rowHasChanged: (r1, r2) => r1 !== r2
         });
         this.dataSource = ds.cloneWithRows(notes);
     }
+    
     renderRow(note) {
         if (note !== undefined) {
             return <Note note={note} isNote />;
